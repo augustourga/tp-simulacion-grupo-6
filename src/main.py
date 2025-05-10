@@ -1,7 +1,9 @@
 # simulation.py
 import random
 
+TPSHV = float('inf') - 1
 HV = float('inf')
+
 PENALIZATION_TIME = 20  # ms
 
 class Simulation:
@@ -22,7 +24,7 @@ class Simulation:
         self.CRS = 0
 
         # Arrays for workers
-        self.TPS = [HV] * cw
+        self.TPS = [TPSHV] * cw
         self.ITO = [0.0] * cw
         self.CIR = [0.0] * cw  # CPU usage per request (in MIPS)
         self.SERV = [0.0] * cw  # service time in ms
@@ -64,7 +66,7 @@ class Simulation:
         while True:
             i = self.find_next_departure_index()
 
-            if self.TPLL <= self.TPS[i]:
+            if self.TPLL < self.TPS[i]:
                 # Arrival event
                 self.T = self.TPLL
                 self.STLL += self.T
@@ -72,7 +74,7 @@ class Simulation:
                 self.CRS += 1
                 self.TPLL = self.T + self.generate_interarrival_time()
 
-                print(f"[ARRIVAL] Time={self.T}ms | CRS={self.CRS} | NT={self.NT}")
+                print(f"[ARRIVAL] Time={self.T}ms | CRS={self.CRS} | NT={self.NT} , TPLL= {self.TPLL} , TPS[{i}] = {self.TPS[i]}")
 
                 if self.CRS <= self.CW:
                     self.STOC += self.T - self.ITO[i]
@@ -88,7 +90,7 @@ class Simulation:
                 if self.CRS >= self.CW:
                     self.assign_new_task_to_worker(i)
                 else:
-                    self.TPS[i] = HV
+                    self.TPS[i] = TPSHV
                     self.ITO[i] = self.T
 
 
