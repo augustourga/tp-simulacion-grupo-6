@@ -30,20 +30,19 @@ class Simulation:
         self.SERV = [0.0] * cw  # service time in ms
         self.UCPU = [0.0] * cw
 
+        #Arrays de VA
+        self.TA = array_ta
+        self.IA = fdp_IA
+        self.CI = array_CI
+
     def generate_interarrival_time(self):
-        loc = 0.0
-        scale = 74.34144
-        return stats.expon.rvs(loc=loc, scale=scale, size=1)[0]  # in ms
+        return self.IA[random.randint(0, 24999)]  # in ms
 
     def generate_service_time(self):
-        h = 1.0007386965056315
-        k = 1.0003493448869198
-        loc = 0.6312614866274571
-        scale = 499.5433767462339
-        return stats.kappa4.rvs(h, k, loc=loc, scale=scale, size=1)[0]  # in ms
+        return self.TA[random.randint(0, 24999)]  # in ms
 
     def generate_cpu_usage(self):
-        return random.uniform(10, 30)  # in MIPS
+        return self.CI[random.randint(0, 24999)] # in MIPS
 
     def find_next_departure_index(self):
         min_time = min(self.TPS)
