@@ -49,6 +49,10 @@ class Simulation:
         min_time = min(self.TPS)
         return self.TPS.index(min_time)
 
+    def find_idle_worker(self):
+        max_time = max(self.TPS)
+        return self.TPS.index(max_time)
+
     def assign_new_task_to_worker(self, i):
         self.CIR[i] = self.generate_cpu_usage()
         self.SERV[i] = self.generate_service_time()
@@ -81,8 +85,9 @@ class Simulation:
                 print(f"[ARRIVAL] Time={self.T}ms | CRS={self.CRS} | NT={self.NT} , TPLL= {self.TPLL} , TPS[{i}] = {self.TPS[i]}")
 
                 if self.CRS <= self.CW:
-                    self.STOC += self.T - self.ITO[i]
-                    self.assign_new_task_to_worker(i)
+                    index = self.find_idle_worker()
+                    self.STOC += self.T - self.ITO[index]
+                    self.assign_new_task_to_worker(index)
             else:
                 if self.CRS > 0:
                     # Departure event
@@ -110,7 +115,7 @@ class Simulation:
     def calculate_statistics(self):
         TPER = (self.STS - self.STLL - self.STE) / self.NT if self.NT else 0
         PPCMCPU = self.CP / self.NT if self.NT else 0
-        PTO = (self.STOC * 100) / self.T if self.T else 0
+        PTO = (self.STOC * 100) / (self.T * self.CW) if self.T else 0
         return {
             "TPER (ms)": TPER,
             "PPCMCPU": PPCMCPU,
