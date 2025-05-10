@@ -2,7 +2,6 @@
 import random
 from scipy import stats
 
-TPSHV = float('inf') - 1
 HV = float('inf')
 
 PENALIZATION_TIME = 20  # ms
@@ -25,7 +24,7 @@ class Simulation:
         self.CRS = 0
 
         # Arrays for workers
-        self.TPS = [TPSHV] * cw
+        self.TPS = [HV] * cw
         self.ITO = [0.0] * cw
         self.CIR = [0.0] * cw  # CPU usage per request (in MIPS)
         self.SERV = [0.0] * cw  # service time in ms
@@ -68,8 +67,6 @@ class Simulation:
             print(f"[ASSIGN] Time={self.T}ms | Worker={i} | CPU EXCEEDED | SERV+PEN={self.SERV[i] + PENALIZATION_TIME:.2f}ms")
 
     def run(self):
-        self.TPLL = self.generate_interarrival_time()
-
         while True:
             i = self.find_next_departure_index()
 
@@ -87,18 +84,19 @@ class Simulation:
                     self.STOC += self.T - self.ITO[i]
                     self.assign_new_task_to_worker(i)
             else:
-                # Departure event
-                self.T = self.TPS[i]
-                self.STS += self.T
-                self.CRS -= 1
-                self.UCPU[i] = 0.0
-                print(f"[DEPARTURE] Time={self.T}ms | Worker={i} | CRS={self.CRS}")
+                if self.CRS > 0:
+                    # Departure event
+                    self.T = self.TPS[i]
+                    self.STS += self.T
+                    self.CRS -= 1
+                    self.UCPU[i] = 0.0
+                    print(f"[DEPARTURE] Time={self.T}ms | Worker={i} | CRS={self.CRS}")
 
-                if self.CRS >= self.CW:
-                    self.assign_new_task_to_worker(i)
-                else:
-                    self.TPS[i] = TPSHV
-                    self.ITO[i] = self.T
+                    if self.CRS >= self.CW:
+                        self.assign_new_task_to_worker(i)
+                    else:
+                        self.TPS[i] = HV
+                        self.ITO[i] = self.T
 
 
             if self.T > self.TF:
