@@ -42,7 +42,6 @@ class Simulation:
         return self.TPS.index(min_time)
 
     def assign_new_task_to_worker(self, i):
-        self.ITO[i] = self.T
         self.CIR[i] = self.generate_cpu_usage()
         self.SERV[i] = self.generate_service_time()
         self.UCPU[i] = self.CIR[i]
@@ -76,6 +75,7 @@ class Simulation:
                 print(f"[ARRIVAL] Time={self.T}ms | CRS={self.CRS} | NT={self.NT}")
 
                 if self.CRS <= self.CW:
+                    self.STOC += self.T - self.ITO[i]
                     self.assign_new_task_to_worker(i)
             else:
                 # Departure event
@@ -83,13 +83,14 @@ class Simulation:
                 self.STS += self.T
                 self.CRS -= 1
                 self.UCPU[i] = 0.0
-                self.STOC += self.T - self.ITO[i]
                 print(f"[DEPARTURE] Time={self.T}ms | Worker={i} | CRS={self.CRS}")
 
                 if self.CRS >= self.CW:
                     self.assign_new_task_to_worker(i)
                 else:
                     self.TPS[i] = HV
+                    self.ITO[i] = self.T
+
 
             if self.T > self.TF:
                 self.TPLL = HV
