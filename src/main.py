@@ -1,5 +1,6 @@
 # simulation.py
 import random
+from scipy import stats
 
 TPSHV = float('inf') - 1
 HV = float('inf')
@@ -31,10 +32,16 @@ class Simulation:
         self.UCPU = [0.0] * cw
 
     def generate_interarrival_time(self):
-        return random.expovariate(1 / 10)  # in ms
+        loc = 0.0
+        scale = 74.34144
+        return stats.expon.rvs(loc=loc, scale=scale, size=1)[0]  # in ms
 
     def generate_service_time(self):
-        return random.uniform(5, 15)  # in ms
+        h = 1.0007386965056315
+        k = 1.0003493448869198
+        loc = 0.6312614866274571
+        scale = 499.5433767462339
+        return stats.kappa4.rvs(h, k, loc=loc, scale=scale, size=1)[0]  # in ms
 
     def generate_cpu_usage(self):
         return random.uniform(10, 30)  # in MIPS
